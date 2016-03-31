@@ -3,15 +3,12 @@ package com.github.hshn.equation.solution
 import spire.math.Rational
 
 class Matrix(rows: Row*) {
+
   def solve(): Seq[Rational] = {
-    var answer = Seq.empty[Rational]
-    eliminate().foreachWithIndex {
-      case (row, index) => answer = answer :+ row.last / row(index)
-    }
-    answer
+    eliminate().foldLeft(Seq.empty[Rational])((answer, row, index) => answer :+ row.last / row(index))
   }
 
-  def eliminate(index: Int): Matrix = map { rows =>
+  private def eliminate(index: Int): Matrix = map { rows =>
     rows.zipWithIndex.map {
       case (row, i) => if (i == index) {
         row
@@ -21,14 +18,19 @@ class Matrix(rows: Row*) {
     }
   }
 
-  def eliminate(): Matrix = {
+  private def eliminate(): Matrix = {
     rows.foldLeft(this)((eliminating, row) => {
       eliminating.eliminate(rows.indexOf(row))
     })
   }
 
-  def map(f: Seq[Row] => Seq[Row]): Matrix = new Matrix(f(rows):_*)
-  def foreachWithIndex[U](f: ((Row, Int)) => U): Unit = rows.zipWithIndex.foreach(f)
+  private def map(f: Seq[Row] => Seq[Row]): Matrix = new Matrix(f(rows):_*)
+
+  private def foldLeft[A](z: A)(op: (A, Row, Int) => A) = {
+    rows.zipWithIndex.foldLeft(z)((acc, tuple) => tuple match {
+      case (row, index) => op(acc, row, index)
+    })
+  }
 
   override def toString: String = s"Matrix(\n  ${rows.mkString(",\n  ")}\n)"
 }
