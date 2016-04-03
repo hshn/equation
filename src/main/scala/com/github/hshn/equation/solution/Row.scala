@@ -1,6 +1,6 @@
 package com.github.hshn.equation.solution
 
-import spire.math._
+import spire.math.Rational
 
 case class Row(values: Rational*) {
   def apply(index: Int): Rational = values(index)
